@@ -1,9 +1,15 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import sklearn.model_selection
+import sklearn.decomposition
+import sklearn.impute
+import sklearn.preprocessing
 
-df = pd.read_csv('/Users/benoitginies/PycharmProjects/Projet_apprentissage_automatique/Projet_Apprentisage_Automatiqur/drinking_water_potability.csv')
+dir = os.getcwd()
+
+df = pd.read_csv(dir + '/drinking_water_potability.csv')
 
 data = df[['ph', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity', 'Organic_carbon',
            'Trihalomethanes', 'Turbidity']]
@@ -11,11 +17,32 @@ labels = df['Potability']
 
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, labels, test_size=0.30, random_state=56)
 
-print(y_train)
-print(pd.concat([X_train, y_train], axis = 1, join='inner'))
-print(X_train)
+corr_matrix = df.corr()
 
-#print(data.isna().sum() / len(df))
+#Normalizing data with mean and std
+
+normalizer = sklearn.preprocessing.StandardScaler()
+data = pd.DataFrame(normalizer.fit_transform(data), columns=data.columns)
+
+#corr_matrix.to_excel(dir + '/features_correlation.xlsx')
+
+print(data.isna().sum() / len(df))
+print(len(df))
+
+#Predict missing data with a regression
+
+KNNImput = sklearn.impute.KNNImputer(n_neighbors = 15)
+data = pd.DataFrame(KNNImput.fit_transform(data), columns=data.columns)
+
+#Compute PCA and explore feature importance
+
+PCA = sklearn.decomposition.PCA(n_components = 9)
+PCA.fit(data)
+
+print(PCA.explained_variance_ratio_)
+
+#Various models
+
 
 ###### Rome
 
