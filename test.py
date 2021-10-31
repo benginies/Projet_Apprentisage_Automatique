@@ -6,16 +6,26 @@ import sklearn.model_selection
 import sklearn.decomposition
 import sklearn.impute
 import sklearn.preprocessing
+import sklearn.ensemble
+import sklearn.utils
 
 dir = os.getcwd()
 
-df = pd.read_csv(dir + '/drinking_water_potability.csv')
+df = pd.read_csv(dir + '/Data/drinking_water_potability.csv')
 
 data = df[['ph', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity', 'Organic_carbon',
            'Trihalomethanes', 'Turbidity']]
 labels = df['Potability']
 
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, labels, test_size=0.30, random_state=56)
+data, labels = sklearn.utils.shuffle(data, labels)
+
+data_pot = df.loc[df['Potability'] == 1]
+data_npot = df.loc[df['Potability'] == 0]
+
+print(len(data_pot) / len(df))
+print(len(data_npot) / len(df))
+
+#X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, labels, test_size=0.30, random_state=56)
 
 corr_matrix = df.corr()
 
@@ -31,17 +41,72 @@ print(len(df))
 
 #Predict missing data with a regression
 
-KNNImput = sklearn.impute.KNNImputer(n_neighbors = 15)
-data = pd.DataFrame(KNNImput.fit_transform(data), columns=data.columns)
+KNNImpute = sklearn.impute.KNNImputer(n_neighbors = 15)
+KNNdata = pd.DataFrame(KNNImpute.fit_transform(data), columns=data.columns)
+
+MeanImpute = sklearn.impute.SimpleImputer(strategy = 'mean')
+Meandata = pd.DataFrame(MeanImpute.fit_transform(data), columns=data.columns)
+
+potMeanImpute = sklearn.impute.SimpleImputer(strategy = 'mean')
+npotMeanImpute = sklearn.impute.SimpleImputer(strategy = 'mean')
+potMeandata = pd.DataFrame(potMeanImpute.fit_transform(data_pot), columns=data_pot.columns)
+npotMeandata = pd.DataFrame(npotMeanImpute.fit_transform(data_npot), columns=data_npot.columns)
+SepMeandata = pd.concat([potMeandata, npotMeandata], axis  = 0)
+SepMeanlabels = SepMeandata['Potability'].copy()
+SepMeandata = SepMeandata.drop(['Potability'], axis = 1)
+SepMeandata, SepMeanlabels = sklearn.utils.shuffle(SepMeandata, SepMeanlabels)
+
+
+#Predict missing data with mean
 
 #Compute PCA and explore feature importance
 
-PCA = sklearn.decomposition.PCA(n_components = 9)
-PCA.fit(data)
-
-print(PCA.explained_variance_ratio_)
+# PCA = sklearn.decomposition.PCA(n_components = 9)
+# PCA.fit(data)
+#
+# print(PCA.explained_variance_ratio_)
 
 #Various models
+
+#RF
+
+#RF grid search (with cv)
+
+parameters = {'n_estimators' : [10,100,500], 'max_depth' : [5, 10, 15], 'min_samples_leaf' : [1, 10, 50]}
+#parameters = {'n_estimators' : [10, 100], 'max_depth' : [5], 'min_samples_leaf' : [1]}
+
+
+KNNRF = sklearn.ensemble.RandomForestClassifier()
+GSKNNRF = sklearn.model_selection.GridSearchCV(KNNRF, parameters, verbose = 2)
+GSKNNRF.fit(KNNdata, labels)
+KNNscores = GSKNNRF.best_score_
+print("KNN imputer, RF",KNNscores)
+
+MeanRF = sklearn.ensemble.RandomForestClassifier()
+GSMeanRF = sklearn.model_selection.GridSearchCV(MeanRF, parameters, verbose = 2)
+GSMeanRF.fit(Meandata, labels)
+Meanscores = GSMeanRF.best_score_
+print("Mean imputer, RF",Meanscores)
+
+SepMeanRF = sklearn.ensemble.RandomForestClassifier()
+GSSepMeanRF = sklearn.model_selection.GridSearchCV(SepMeanRF, parameters, verbose = 2)
+GSSepMeanRF.fit(SepMeandata, SepMeanlabels)
+SepMeanscores = GSSepMeanRF.best_score_
+print("Sep Mean imputer, RF",Meanscores)
+
+# KNNRF = sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
+# KNNscores = sklearn. model_selection.cross_val_score(KNNRF, KNNdata, labels , cv=5)
+# print("KNN imputer, RF",KNNscores)
+#
+# MeanRF = sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
+# Meanscores = sklearn. model_selection.cross_val_score(MeanRF, Meandata, labels , cv=5)
+# print("Mean imputer, RF",Meanscores)
+#
+# SepMeanRF = sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
+# SepMeanscores = sklearn. model_selection.cross_val_score(SepMeanRF, SepMeandata, SepMeanlabels , cv=5)
+# print("SepMean imputer, RF",SepMeanscores)
+
+#
 
 
 ###### Rome
