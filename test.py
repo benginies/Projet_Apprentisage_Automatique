@@ -8,6 +8,9 @@ import sklearn.impute
 import sklearn.preprocessing
 import sklearn.ensemble
 import sklearn.utils
+import sklearn.svm
+import sklearn.naive_bayes
+import sklearn.linear_model
 
 dir = os.getcwd()
 
@@ -72,27 +75,29 @@ SepMeandata, SepMeanlabels = sklearn.utils.shuffle(SepMeandata, SepMeanlabels)
 
 #RF grid search (with cv)
 
-parameters = {'n_estimators' : [10,100,500], 'max_depth' : [5, 10, 15], 'min_samples_leaf' : [1, 10, 50]}
+#RFparameters = {'n_estimators' : [10,100,500], 'max_depth' : [7, 10, 12], 'min_samples_leaf' : [1, 10, 50]}
+RFparameters = {'n_estimators' : [500, 750, 1000], 'max_depth' : [8, 10, 11], 'min_samples_leaf' : [1]}
 #parameters = {'n_estimators' : [10, 100], 'max_depth' : [5], 'min_samples_leaf' : [1]}
 
 
-KNNRF = sklearn.ensemble.RandomForestClassifier()
-GSKNNRF = sklearn.model_selection.GridSearchCV(KNNRF, parameters, verbose = 2)
-GSKNNRF.fit(KNNdata, labels)
-KNNscores = GSKNNRF.best_score_
-print("KNN imputer, RF",KNNscores)
-
-MeanRF = sklearn.ensemble.RandomForestClassifier()
-GSMeanRF = sklearn.model_selection.GridSearchCV(MeanRF, parameters, verbose = 2)
-GSMeanRF.fit(Meandata, labels)
-Meanscores = GSMeanRF.best_score_
-print("Mean imputer, RF",Meanscores)
-
-SepMeanRF = sklearn.ensemble.RandomForestClassifier()
-GSSepMeanRF = sklearn.model_selection.GridSearchCV(SepMeanRF, parameters, verbose = 2)
-GSSepMeanRF.fit(SepMeandata, SepMeanlabels)
-SepMeanscores = GSSepMeanRF.best_score_
-print("Sep Mean imputer, RF",Meanscores)
+# KNNRF = sklearn.ensemble.RandomForestClassifier()
+# GSKNNRF = sklearn.model_selection.GridSearchCV(KNNRF, RFparameters, verbose = 2)
+# GSKNNRF.fit(KNNdata, labels)
+# KNNRFscores = GSKNNRF.best_score_
+# print("KNN imputer, RF",KNNRFscores)
+#
+# MeanRF = sklearn.ensemble.RandomForestClassifier()
+# GSMeanRF = sklearn.model_selection.GridSearchCV(MeanRF, RFparameters, verbose = 2)
+# GSMeanRF.fit(Meandata, labels)
+# MeansRFcores = GSMeanRF.best_score_
+# print("Mean imputer, RF",MeansRFcores)
+#
+# SepMeanRF = sklearn.ensemble.RandomForestClassifier()
+# GSSepMeanRF = sklearn.model_selection.GridSearchCV(SepMeanRF, RFparameters, verbose = 2)
+# GSSepMeanRF.fit(SepMeandata, SepMeanlabels)
+# SepMeanRFcores = GSSepMeanRF.best_score_
+# print("Sep Mean imputer, RF",SepMeanRFcores)
+# print("Best params",GSSepMeanRF.best_params_)
 
 # KNNRF = sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
 # KNNscores = sklearn. model_selection.cross_val_score(KNNRF, KNNdata, labels , cv=5)
@@ -106,8 +111,75 @@ print("Sep Mean imputer, RF",Meanscores)
 # SepMeanscores = sklearn. model_selection.cross_val_score(SepMeanRF, SepMeandata, SepMeanlabels , cv=5)
 # print("SepMean imputer, RF",SepMeanscores)
 
-#
+#SVC
 
+SVCparameters = {'C' : [0.1, 1, 10], 'kernel' : ['linear', 'poly', 'sigmoid']}
+
+# KNNSVC = sklearn.svm.SVC()
+# GSKNNSVC = sklearn.model_selection.GridSearchCV(KNNSVC, SVCparameters, verbose = 2)
+# GSKNNSVC.fit(KNNdata, labels)
+# KNNSVCscores = GSKNNSVC.best_score_
+# print("KNN imputer, SVC", KNNSVCscores)
+#
+# MeanSVC = sklearn.svm.SVC()
+# GSMeanSVC = sklearn.model_selection.GridSearchCV(MeanSVC, SVCparameters, verbose = 2)
+# GSMeanSVC.fit(Meandata, labels)
+# MeanSVCscores = GSMeanSVC.best_score_
+# print("Mean imputer, SVC", MeanSVCscores)
+#
+# SepMeanSVC = sklearn.svm.SVC()
+# GSSepMeanSVC = sklearn.model_selection.GridSearchCV(SepMeanSVC, SVCparameters, verbose = 2)
+# GSSepMeanSVC.fit(SepMeandata, SepMeanlabels)
+# SepMeanSVCscores = GSSepMeanSVC.best_score_
+# print("Sep Mean imputer, SVC", SepMeanSVCscores)
+
+#Adaboost
+
+ABparameters = {'n_estimators' : [125, 150, 175], 'learning_rate' : [0.4, 0.5, 0.6]}
+#
+# KNNAB = sklearn.ensemble.AdaBoostClassifier()
+# GSKNNAB = sklearn.model_selection.GridSearchCV(KNNAB, ABparameters, verbose = 2)
+# GSKNNAB.fit(KNNdata, labels)
+# KNNABscores = GSKNNAB.best_score_
+# print("KNN imputer, AB", KNNABscores)
+#
+# MeanAB = sklearn.ensemble.AdaBoostClassifier()
+# GSMeanAB = sklearn.model_selection.GridSearchCV(MeanAB, ABparameters, verbose = 2)
+# GSMeanAB.fit(Meandata, labels)
+# MeanABscores = GSMeanAB.best_score_
+# print("Mean imputer, AB", MeanABscores)
+#
+# SepMeanAB = sklearn.ensemble.AdaBoostClassifier()
+# GSSepMeanAB = sklearn.model_selection.GridSearchCV(SepMeanAB, ABparameters, verbose = 2)
+# GSSepMeanAB.fit(SepMeandata, SepMeanlabels)
+# SepMeanABscores = GSSepMeanAB.best_score_
+# print("Sep Mean imputer, AB", SepMeanABscores)
+# print("Best params", GSSepMeanAB.best_params_)
+
+#Gaussian Naive Bayes
+
+# KNNGNB = sklearn.naive_bayes.GaussianNB()
+# KNNGNBscores = sklearn. model_selection.cross_val_score(KNNGNB, KNNdata, labels , cv=5)
+# print("KNN imputer, GNB",KNNGNBscores.mean())
+#
+# MeanGNB = sklearn.naive_bayes.GaussianNB()
+# MeanGNBscores = sklearn. model_selection.cross_val_score(MeanGNB, Meandata, labels , cv=5)
+# print("Mean imputer, GNB",MeanGNBscores.mean())
+#
+# SepMeanGNB = sklearn.naive_bayes.GaussianNB()
+# SepMeanGNBscores = sklearn. model_selection.cross_val_score(SepMeanGNB, SepMeandata, SepMeanlabels , cv=5)
+# print("SepMean imputer, GNB",SepMeanGNBscores.mean())
+
+#Stacking with best examples
+
+estimators = [
+    ('RF', sklearn.ensemble.RandomForestClassifier(n_estimators=750, max_depth=11, min_samples_leaf=1)),
+    ('AB', sklearn.ensemble.AdaBoostClassifier(learning_rate=0.5, n_estimators=125))
+]
+
+stack = sklearn.ensemble.StackingClassifier(estimators=estimators, final_estimator=sklearn.linear_model.LogisticRegression())
+SepMeanStackscores = sklearn. model_selection.cross_val_score(stack, SepMeandata, SepMeanlabels , cv=5, verbose = 1)
+print("SepMean imputer, RF",SepMeanStackscores.mean())
 
 ###### Rome
 
